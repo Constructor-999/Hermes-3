@@ -1,68 +1,96 @@
 import Image from "next/image";
 import Head from 'next/head';
+import { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 export default function Home() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
+  const [buttonText, setButtonText] = useState('Sign In');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Reset any previous error states
+      setErrorMessage('');
+      setIsShaking(false);
+      setButtonText('Signing In...');
+
+      // Sign in with Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      setSuccessMessage(`Welcome ${user.email}`);
+      setButtonText('Sign In'); // Reset button text upon success
+    } catch (error) {
+      // Show error message and shake button
+      setErrorMessage('Email or password is incorrect');
+      setButtonText('Email or password is incorrect');
+      setIsShaking(true);
+
+      // Stop shaking after the animation completes
+      setTimeout(() => {
+        setIsShaking(false);
+        setButtonText('Sign In'); 
+      }, 500); // Shake duration is 500ms
+    }
+  };
+
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="login-page">
       <Head>
-        <title>Login Page</title>
+        <title>Hermes III Login</title>
         <meta name="description" content="Login Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Main container */}
-      <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 md:p-10 lg:p-12 xl:p-16 rounded-lg shadow-lg w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl">
-        
+      <div className="login-container">
         {/* Icon */}
-        <div className="flex justify-center mb-6">
-          <img
-            src="/login-icon.svg"
-            alt="Login Icon"
-            className="w-12 h-12 sm:w-16 sm:h-16"
-          />
+        <div className="login-icon">
+          <img src="/login-icon.svg" alt="Login Icon" />
         </div>
 
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 text-center mb-6">
-          Login
-        </h2>
+        <h2 className="login-title">Login</h2>
 
         {/* Login Form */}
-        <form>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+        <form className="login-form">
+
+          {errorMessage && <p className="error-message text-red-500">{errorMessage}</p>}
+          {successMessage && <p className="success-message text-green-500">{successMessage}</p>}
+
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
               Email address
             </label>
-            <input
-              type="email"
-              id="email"
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
+
+            <input type="email" id="email" className="form-input"
+            
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+
+            required />
           </div>
 
-          <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
+
+            <input type="password" id="password" className="form-input"
+            
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+
+            required />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
+          <button type="submit" className="login-button">
             Sign In
           </button>
         </form>
