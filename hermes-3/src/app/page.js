@@ -1,97 +1,85 @@
-import Image from "next/image";
+"use client";
+
 import Head from 'next/head';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { auth } from '../apis/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import styles from './styles/login.module.css';
 
 export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isShaking, setIsShaking] = useState(false);
-  const [buttonText, setButtonText] = useState('Sign In');
+  const [error, setError] = useState(null);
+  const [isError, setIsError] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError(null); // Reset error state
+    setIsError(false); // Reset error animation state
 
     try {
-      // Reset any previous error states
-      setErrorMessage('');
-      setIsShaking(false);
-      setButtonText('Signing In...');
-
-      // Sign in with Firebase Authentication
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      setSuccessMessage(`Welcome ${user.email}`);
-      setButtonText('Sign In'); // Reset button text upon success
-    } catch (error) {
-      // Show error message and shake button
-      setErrorMessage('Email or password is incorrect');
-      setButtonText('Email or password is incorrect');
-      setIsShaking(true);
-
-      // Stop shaking after the animation completes
-      setTimeout(() => {
-        setIsShaking(false);
-        setButtonText('Sign In'); 
-      }, 500); // Shake duration is 500ms
+      await signInWithEmailAndPassword(auth, email, password);
+      // Redirect or show a success message here
+      alert('Login successful!');
+    } catch (err) {
+      setError('Email or Password is Incorrect'); // Set error message
+      setIsError(true); // Trigger error animation
     }
   };
 
-
   return (
-    <div className="login-page">
+    <div className={styles["login-page"]}>
       <Head>
         <title>Hermes III Login</title>
         <meta name="description" content="Login Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="login-container">
+      <div className={styles["login-container"]}>
         {/* Icon */}
-        <div className="login-icon">
-          <img src="/login-icon.svg" alt="Login Icon" />
+        <div className={styles["login-icon"]}>
+          <div>
+            <img src="/login-icon.png" alt="Login Icon"/>
+          </div>
         </div>
 
         {/* Title */}
-        <h2 className="login-title">Login</h2>
+        <h2 className={styles["login-title"]}>Login</h2>
 
         {/* Login Form */}
-        <form className="login-form">
+        <form className={styles["login-form"]} onSubmit={handleLogin}>
 
-          {errorMessage && <p className="error-message text-red-500">{errorMessage}</p>}
-          {successMessage && <p className="success-message text-green-500">{successMessage}</p>}
-
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
+          <div className={styles["form-group"]}>
+            <label htmlFor="email" className={styles["form-label"]}>
               Email address
             </label>
 
-            <input type="email" id="email" className="form-input"
-            
+            <input type="email" id="email" className={styles["form-input"]}
+
+            placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
 
             required />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
+          <div className={styles["form-group"]}>
+            <label htmlFor="password" className={styles["form-label"]}>
               Password
             </label>
 
-            <input type="password" id="password" className="form-input"
-            
+            <input type="password" id="password" className={styles["form-input"]}
+
+            placeholder="Password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
 
             required />
           </div>
 
-          <button type="submit" className="login-button">
-            Sign In
+          <button type="submit" className={`${styles["login-button"]} ${isError ? styles['login-error'] : ''}`}>
+          {isError ? 'Email or Password is Incorrect' : 'Sign In'}
           </button>
         </form>
       </div>

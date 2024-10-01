@@ -11,8 +11,11 @@ module.exports = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      aspectRatio: {
+        '209/126': '209 / 126', // Custom aspect ratio
+      },
     },
   },
   darkMode: 'media',
-  plugins: [],
+  plugins: [require('@tailwindcss/aspect-ratio')],
 };

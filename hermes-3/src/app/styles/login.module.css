@@ -1,0 +1,76 @@
+  .animate-shake {
+    animation: shake 0.5s;
+  }
+  
+  @keyframes shake {
+    0% {
+      transform: translate(3px, 0);
+    }
+    25% {
+      transform: translate(-3px, 0);
+    }
+    50% {
+      transform: translate(3px, 0);
+    }
+    75% {
+      transform: translate(-3px, 0);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+.login-page {
+    @apply min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8;
+  }
+  
+  .login-container {
+    @apply bg-white dark:bg-gray-800 p-6 sm:p-8 md:p-10 lg:p-12 xl:p-16 
+           rounded-lg shadow-lg w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl;
+  }
+  
+  .login-icon {
+    @apply flex justify-center mb-6 ;
+  }
+  
+  .login-icon div {
+    @apply aspect-[209/126];
+  }
+
+  .login-icon div img {
+    @apply object-cover w-full h-full;
+  }
+  
+  .login-title {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 text-center mb-6;
+  }
+  
+  .login-form {
+    @apply space-y-4;
+  }
+  
+  .form-group {
+    @apply mb-4;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300;
+  }
+  
+  .form-input {
+    @apply mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border 
+           border-gray-300 dark:border-gray-600 rounded-md text-gray-900 
+           dark:text-gray-100 shadow-sm focus:outline-none focus:ring-indigo-500 
+           focus:border-indigo-500 sm:text-sm;
+  }
+  
+  .login-button {
+    @apply w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 
+           rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 
+           focus:ring-offset-2;
+    
+  }
+
+  .login-error {
+    @apply bg-red-500 hover:bg-red-600 animate-shake;
+  }
