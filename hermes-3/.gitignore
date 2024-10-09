@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+/bdd/user-config.json
 
 # debug
 npm-debug.log*
