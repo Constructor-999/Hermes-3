@@ -101,7 +101,7 @@ export default function Login() {
             className={`${styles["login-button"]} ${
               isError ? styles["login-error"] : ""
             }`}
-            //disabled={loading}
+            disabled={loading}
           >
             {loading
               ? "Logging in..."
