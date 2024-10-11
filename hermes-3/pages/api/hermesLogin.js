@@ -1,12 +1,7 @@
 import { spawn } from "child_process";
-import {
-  aesDecrypt,
-  deriveKeys,
-  verifyHMAC,
-} from "../../modules/encryption";
+import { aesDecrypt, deriveKeys, verifyHMAC } from "../../modules/encryption";
 import admin from "../../modules/firebaseAdmin";
 import { JsonDB, Config } from "node-json-db";
- 
 
 function parseHttpResponse(responseString) {
   const lines = responseString.trim().split("\n");
@@ -114,15 +109,42 @@ export default async function handler(req, res) {
           "-d",
           `${process.env.NEXT_HERMES_CMWT}&username=${decyptedLogin.email}&password=${decyptedLogin.pass}`,
         ]);
-        
+
         curl.stdout.on("data", async (data) => {
           const parsedResponse = parseHttpResponse(`${data}`);
           if (parsedResponse.statusCode == 302) {
             const csrfToken = parsedResponse.cookies[0].value;
             const sessionID = parsedResponse.cookies[1].value;
-            const expirationDate = new Date(parsedResponse.cookies[1].attributes.expires).getTime();
+            const expirationDate = new Date(
+              parsedResponse.cookies[1].attributes.expires
+            ).getTime();
 
-            await jsonDB.push(`/${decodedToken.uid}`, { csrftoken: csrfToken, sessionid: sessionID, expiration_date: expirationDate }, true);
+            if (await jsonDB.exists(`/${decodedToken.uid}`)) {
+              await jsonDB.push(
+                `/${decodedToken.uid}`,
+                {
+                  csrftoken: csrfToken,
+                  sessionid: sessionID,
+                  expiration_date: expirationDate,
+                },
+                false
+              );
+            } else {
+              await jsonDB.push(
+                `/${decodedToken.uid}`,
+                {
+                  csrftoken: csrfToken,
+                  sessionid: sessionID,
+                  expiration_date: expirationDate,
+                  prefecences: {
+                    "hermes-id": "",
+                    "name": "",
+                    
+                  },
+                },
+                true
+              );
+            }
 
             res.status(200).json({ message: "YAY" });
           } else {

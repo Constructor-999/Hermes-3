@@ -19,6 +19,10 @@ export default async function handler(req, res) {
           } 
         }
 
+        if (req.body.func == "getPreferences") {
+          const userConfig = await jsonDB.getData(`/${decodedToken.uid}/preferences`);
+        }
+
       } catch (error) {
         res.status(500).json({ error: "Invalid token" });
       }
