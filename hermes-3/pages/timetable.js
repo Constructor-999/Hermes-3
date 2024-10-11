@@ -57,7 +57,7 @@ export default function Timetable() {
   };
 
   return (
-    <div className="flex h-screen dark:bg-gray-700 bg-white">
+    <div className="flex h-screen dark:bg-gray-700 bg-white overflow-hidden">
       <div className="w-1/7 bg-gray-300 dark:bg-gray-900 p-4">
         <div className="flex justify-center mb-6">
           <div className="aspect-[209/126]">
