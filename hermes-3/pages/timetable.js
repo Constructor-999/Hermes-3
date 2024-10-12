@@ -13,9 +13,11 @@ export default function Timetable() {
     DateTime.now().setZone("UTC+2")
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDayWeek, setDayWeek] = useState("day");
+  const [isDayWeek, setDayWeek] = useState("week");
   const [dayOfWeek, setDayOfWeek] = useState(
-    currentDate.weekdayShort.toLowerCase().slice(0, 3)
+    currentDate.weekdayShort.toLowerCase().slice(0, 3) === "sat" || "sun"
+      ? "mon"
+      : currentDate.weekdayShort.toLowerCase().slice(0, 3)
   );
 
   const daysInWeek = [
@@ -24,8 +26,6 @@ export default function Timetable() {
     { label: "Wed", value: "wed", date: currentDate.startOf("week").day + 2 },
     { label: "Thu", value: "thu", date: currentDate.startOf("week").day + 3 },
     { label: "Fri", value: "fri", date: currentDate.startOf("week").day + 4 },
-    { label: "Sat", value: "sat", date: currentDate.startOf("week").day + 5 },
-    { label: "Sun", value: "sun", date: currentDate.startOf("week").day + 6 },
   ];
 
   const dayWeekSwitch = [
@@ -35,9 +35,9 @@ export default function Timetable() {
 
   // Dummy timetable data for UI testing
   const timetableData = [
-    { id: 1, className: "Math", teacher: "Mr. Smith", room: "V203" },
-    { id: 2, className: "English", teacher: "Ms. Johnson", room: "B103" },
-    { id: 3, className: "Physics", teacher: "Dr. Adams", room: "E213" },
+    { name: "Chemistry", teacher: "Rys", room: "B150" },
+    { name: "Math ST", teacher: "Leu", room: "B103" },
+    { name: "French", teacher: "Dr. Adams", room: "E213" },
   ];
 
   // Handle color change for class colors
@@ -57,7 +57,7 @@ export default function Timetable() {
   };
 
   return (
-    <div className="flex h-screen dark:bg-gray-700 bg-white overflow-hidden">
+    <div className="flex h-screen dark:bg-gray-700 bg-white">
       <div className="w-1/7 bg-gray-300 dark:bg-gray-900 p-4">
         <div className="flex justify-center mb-6">
           <div className="aspect-[209/126]">
@@ -69,9 +69,9 @@ export default function Timetable() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col w-full">
+      <div className="relative flex flex-col w-full">
         <div
-          className={`h-[8%] dark:bg-gray-800 bg-gray-200 w-full flex items-center z-10`}
+          className={`h-[75px] dark:bg-gray-800 bg-gray-200 w-full flex items-center z-10`}
         >
           <div className="flex w-full items-center justify-between">
             <div className="ml-3 w-[23%] min-w-40">
@@ -158,8 +158,12 @@ export default function Timetable() {
           </div>
         </div>
         <div
-          className={`flex justify-evenly items-center w-full h-fit mt-3 ml-1 mr-1
-            ${isDayWeek === "day" ? "translate-y-0" : "-translate-y-[calc(100%+12px)] mt-0"}
+          className={`absolute flex justify-evenly items-center w-full h-fit 
+            ${
+              isDayWeek === "day"
+                ? "translate-y-[calc(100%)] mt-2"
+                : "-translate-y-[8px] mt-0"
+            }
             transition-transform duration-310 ease-in-out z-0`}
         >
           {daysInWeek.map((daysInWeek) => (
@@ -167,7 +171,9 @@ export default function Timetable() {
               key={daysInWeek.value}
               className={`flex flex-col items-center justify-center w-full mx-2 h-20 p-2 rounded-xl transition-colors duration-310 max-w-36
               ${
-                dayOfWeek === daysInWeek.value ? "dark:bg-gray-950 bg-gray-800" : "dark:bg-gray-600 bg-gray-100"
+                dayOfWeek === daysInWeek.value
+                  ? "dark:bg-gray-950 bg-gray-800"
+                  : "dark:bg-gray-600 bg-gray-100"
               }`}
               onClick={() => setDayOfWeek(daysInWeek.value)}
               disabled={isDayWeek === "week" ? true : false}
@@ -193,6 +199,54 @@ export default function Timetable() {
               </span>
             </button>
           ))}
+        </div>
+        <div
+          className={`flex flex-col items-center my-3 transition-all ease-in-out
+            ${
+              isDayWeek === "day"
+                ? "h-[calc(91%-107px)] translate-y-[95px]"
+                : "h-[91%]"
+            }`}
+        >
+          {isDayWeek === "week" ? (
+            <div className="flex items-center h-fit w-full">
+              <div className={`w-full grid gap-2 ml-3 mr-3 grid-cols-5`}>
+                {daysInWeek.map((daysInWeek) => (
+                  <button
+                    key={daysInWeek.value}
+                    className={`flex flex-col items-center justify-center w-full mx-2 h-20 p-2 rounded-xl transition-colors duration-310 max-w-36`}
+                    onClick={() => setDayOfWeek(daysInWeek.value)}
+                  ></button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
+
+          <div className="flex items-center h-full w-full">
+            <div className={`grid gap-2 ml-3 grid-cols-1 h-full`}>
+              {daysInWeek.map((daysInWeek) => (
+                <button
+                  key={daysInWeek.value}
+                  className={`flex flex-col items-center justify-center w-full mx-2 h-20 p-2 rounded-xl transition-colors duration-310 max-w-36`}
+                  onClick={() => setDayOfWeek(daysInWeek.value)}
+                ></button>
+              ))}
+            </div>
+            <div
+              className={`grid gap-2 mr-3 w-full
+            ${isDayWeek === "day" ? "grid-cols-1" : "grid-cols-5"} h-full`}
+            >
+              {daysInWeek.map((daysInWeek) => (
+                <button
+                  key={daysInWeek.value}
+                  className={`flex flex-col items-center justify-center w-full mx-2 h-20 p-2 rounded-xl transition-colors duration-310 max-w-36`}
+                  onClick={() => setDayOfWeek(daysInWeek.value)}
+                ></button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

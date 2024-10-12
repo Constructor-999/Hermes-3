@@ -13,6 +13,9 @@ module.exports = {
       aspectRatio: {
         '209/126': '209 / 126', // Custom aspect ratio
       },
+      transitionProperty: {
+        'height': 'height',
+      }
     },
   },
   darkMode: 'media',
