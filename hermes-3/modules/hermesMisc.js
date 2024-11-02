@@ -1,8 +1,6 @@
 import { aesEncrypt, deriveKeys, generateHMAC, generateSalt } from "./encryption";
 
-const hermesLogin = async (user, email, password) => {
-  if (user == null) return false;
-  const idToken = await user.getIdToken();
+const hermesCSRFexpirationCheck = async (idToken) => {
   const response = await fetch("/api/userConfig", {
     method: "POST",
     headers: {
@@ -11,10 +9,21 @@ const hermesLogin = async (user, email, password) => {
     body: JSON.stringify({ idToken, func: "expirationCheck" }),
   });
   const resData = await response.json();
+  const is_expired = resData.is_expired
+  if (!is_expired) {
+    return { is_expired, expiration_date: (resData.expiration_date)}
+  }
+  return { is_expired, expiration_date: 0 };
+};
 
-  if (resData.is_expired && email == "" && password == "") return false;
+const hermesLogin = async (user, email, password) => {
+  if (user == null) return false;
+  const idToken = await user.getIdToken();
+  const CSRFexpired = (await hermesCSRFexpirationCheck(idToken)).is_expired;
 
-  if (resData.is_expired) {
+  if (CSRFexpired && email == "" && password == "") return false;
+
+  if (CSRFexpired) {
     const timestamp = Math.floor(Date.now() / 2000);
     const salt = generateSalt();
 
@@ -50,4 +59,9 @@ const hermesLogin = async (user, email, password) => {
   }
 };
 
-export { hermesLogin };
+
+const hermesSearch = async (searchInput, idToken) => {
+
+};
+
+export { hermesLogin, hermesCSRFexpirationCheck, hermesSearch };

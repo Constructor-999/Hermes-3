@@ -136,10 +136,10 @@ export default async function handler(req, res) {
                   csrftoken: csrfToken,
                   sessionid: sessionID,
                   expiration_date: expirationDate,
-                  prefecences: {
+                  preferences: {
                     "hermes-id": "",
                     "name": "",
-                    
+                    class_colors: []
                   },
                 },
                 true

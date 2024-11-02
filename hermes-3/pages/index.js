@@ -51,17 +51,14 @@ export default function Login() {
       </Head>
 
       <div className={styles["login-container"]}>
-        {/* Icon */}
         <div className={styles["login-icon"]}>
           <div>
             <img src="/login-icon.png" alt="Login Icon" />
           </div>
         </div>
 
-        {/* Title */}
         <h2 className={styles["login-title"]}>Login</h2>
 
-        {/* Login Form */}
         <form className={styles["login-form"]} onSubmit={handleLogin}>
           <div className={styles["form-group"]}>
             <label htmlFor="email" className={styles["form-label"]}>
