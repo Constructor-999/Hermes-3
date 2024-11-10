@@ -1,15 +1,20 @@
-import { aesEncrypt, deriveKeys, generateHMAC, generateSalt} from "./encryption";
+import {
+  aesEncrypt,
+  deriveKeys,
+  generateHMAC,
+  generateSalt,
+} from "./encryption";
 
-const getClassColors = async (idToken) => {
+const getUserData = async (idToken) => {
   const response = await fetch("/api/userConfig", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ idToken, func: "getClassColors" }),
+    body: JSON.stringify({ idToken, func: "getUserData" }),
   });
   if (response.ok) {
-    return response.json()
+    return response.json();
   } else {
     return [];
   }
@@ -36,10 +41,16 @@ const setClassColor = async (user, subject, newColor) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ encryptedData, iv, hmac, salt, idToken, func: "setClassColor" }),
+      body: JSON.stringify({
+        encryptedData,
+        iv,
+        hmac,
+        salt,
+        idToken,
+        func: "setClassColor",
+      }),
     });
 
-    // Check if the response is OK and content type is JSON
     if (response.ok) {
       return true;
     } else {
@@ -52,4 +63,4 @@ const setClassColor = async (user, subject, newColor) => {
 
 const hermesUserDB = async (searchInput, idToken) => {};
 
-export { getClassColors, setClassColor }
+export { getUserData, setClassColor };

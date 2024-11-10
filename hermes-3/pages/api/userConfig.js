@@ -26,11 +26,11 @@ export default async function handler(req, res) {
           }
         }
 
-        if (req.body.func == "getClassColors") {
+        if (req.body.func == "getUserData") {
           const userConfig = await jsonDB.getData(
             `/${decodedToken.uid}/preferences`
           );
-          res.status(200).json(userConfig.class_colors);
+          res.status(200).json(userConfig);
         }
 
         if (req.body.func == "setClassColor") {

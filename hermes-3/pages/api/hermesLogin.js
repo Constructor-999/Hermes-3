@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import { aesDecrypt, deriveKeys, verifyHMAC } from "../../modules/encryption";
 import admin from "../../modules/firebaseAdmin";
 import { JsonDB, Config } from "node-json-db";
+import { fetchHermesUserBDD } from "./hermesBDD";
 
 function parseHttpResponse(responseString) {
   const lines = responseString.trim().split("\n");
@@ -99,7 +100,7 @@ export default async function handler(req, res) {
         const decyptedLogin = JSON.parse(aesDecrypt(encryptedData, aesKey, iv));
 
         //YEAH YEAH I KNOW buuut cURL works soooo
-        const curl = spawn("curl", [
+        const curlLogin = spawn("curl", [
           "-i",
           "-X",
           "POST",
@@ -110,7 +111,7 @@ export default async function handler(req, res) {
           `${process.env.NEXT_HERMES_CMWT}&username=${decyptedLogin.email}&password=${decyptedLogin.pass}`,
         ]);
 
-        curl.stdout.on("data", async (data) => {
+        curlLogin.stdout.on("data", async (data) => {
           const parsedResponse = parseHttpResponse(`${data}`);
           if (parsedResponse.statusCode == 302) {
             const csrfToken = parsedResponse.cookies[0].value;
@@ -137,16 +138,14 @@ export default async function handler(req, res) {
                   sessionid: sessionID,
                   expiration_date: expirationDate,
                   preferences: {
-                    "hermes-id": "",
-                    "name": "",
-                    class_colors: []
+                    "hermes_id": "",
+                    class_colors: [],
                   },
                 },
                 true
               );
             }
-
-            res.status(200).json({ message: "YAY" });
+            await fetchHermesUserBDD(csrfToken, sessionID, res)
           } else {
             res.status(500).json({ message: "token not valid" });
           }
