@@ -33,8 +33,6 @@ export default async function handler(req, res) {
       if (req.body && req.body.idToken) {
         const ip = req.ip;
         const now = Date.now();
-        const idToken = req.body.idToken;
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
         
         if (ipRequestTimestamps[ip]) {
           const lastRequestTime = ipRequestTimestamps[ip];
@@ -47,6 +45,9 @@ export default async function handler(req, res) {
         }
 
         ipRequestTimestamps[ip] = now;
+
+        const idToken = req.body.idToken;
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
         const userConfig = await jsonDB.getData(`/${decodedToken.uid}`);
         const csrfToken = userConfig.csrftoken;
         const sessionID = userConfig.sessionid;

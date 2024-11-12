@@ -4,6 +4,9 @@ import admin from "../../modules/firebaseAdmin";
 import { JsonDB, Config } from "node-json-db";
 import { parseHTML } from "../../components/serverUtils";
 
+const ipRequestTimestamps = {};
+const RATE_LIMIT_INTERVAL = 5000;
+
 const jsonDB = new JsonDB(
   new Config("./bdd/user-config.json", true, true, "/")
 );
@@ -12,9 +15,23 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
       if (req.body && req.body.idToken) {
+        const ip = req.ip;
+        const now = Date.now();
+
+        if (ipRequestTimestamps[ip]) {
+          const lastRequestTime = ipRequestTimestamps[ip];
+
+          if (now - lastRequestTime < RATE_LIMIT_INTERVAL) {
+            return res
+              .status(429)
+              .json({ error: "Too many requests. Please try again later." });
+          }
+        }
+
+        ipRequestTimestamps[ip] = now;
+
         const idToken = req.body.idToken;
         const decodedToken = await admin.auth().verifyIdToken(idToken);
-
         const userConfig = await jsonDB.getData(`/${decodedToken.uid}`);
         const csrfToken = userConfig.csrftoken;
         const sessionID = userConfig.sessionid;
@@ -22,7 +39,7 @@ export default async function handler(req, res) {
         const iv = req.body.iv;
         const hmac = req.body.hmac;
         const salt = req.body.salt;
-        const timestamp = Math.floor(Date.now() / 2000);
+        const timestamp = Math.floor(Date.now() / 10000);
 
         const { aesKey, hmacKey } = deriveKeys(
           timestamp,

@@ -101,7 +101,7 @@ const hermesSearch = (searchInput, user) => {
 const getTimetable = async (user, hermesID, date, setHermesID) => {
   if (user == null) return false;
   const idToken = await user.getIdToken();
-  const timestamp = Math.floor(Date.now() / 2000);
+  const timestamp = Math.floor(Date.now() / 10000);
   const salt = generateSalt();
 
   const { aesKey, hmacKey } = deriveKeys(timestamp, salt, user.uid);
@@ -131,7 +131,7 @@ const getTimetable = async (user, hermesID, date, setHermesID) => {
     if (response.ok) {
       return response.json();
     } else {
-      return "404";
+      return `${response.status}`;
     }
   } catch (error) {
     console.error("Error:", error);

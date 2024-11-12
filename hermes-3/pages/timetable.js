@@ -53,6 +53,8 @@ export default function Timetable() {
   const searchRecommandationDropdownRef = useRef(null);
   const [searchData, setSearchData] = useState([]);
   const [userData, setUserData] = useState({});
+  const [timetableFound, setTimetableFound] = useState(true);
+  const [stopIt429, setStopIt429] = useState(false);
 
   const asyncHermesAPIcheck = async () => {
     if (hermesExpiration === 0) {
@@ -89,14 +91,18 @@ export default function Timetable() {
   };
 
   const setUserCustomClassColors = async (timeTable) => {
-    let updatedClassColors = userData.class_colors;
+    let updatedClassColors = [];
 
     getTodaySubjects(timeTable).forEach((classColor) => {
-      if (
-        updatedClassColors.findIndex(
-          (item) => item.subject == classColor.subject
-        ) == -1
-      ) {
+      const classIndex = userData.class_colors.findIndex(
+        (item) => item.subject == classColor.subject
+      );
+      if (classIndex != -1) {
+        updatedClassColors.push({
+          subject: userData.class_colors[classIndex].subject,
+          color: userData.class_colors[classIndex].color,
+        });
+      } else {
         updatedClassColors.push({
           subject: classColor.subject,
           color: classColor.color,
@@ -164,12 +170,14 @@ export default function Timetable() {
         getHermesBDD(user);
       }
     }
-    if (user) asyncHermesAPIcheck();
+    if (user && JSON.stringify(userData) == "{}") asyncHermesAPIcheck();
     if (user && JSON.stringify(userData) == "{}") fetchUserData(user);
 
     if (JSON.stringify(userData) != "{}") {
       if (userData.hermes_id == "") {
         setIsNewUser(true);
+      } else {
+        handleFetchTimetable(userData.hermes_id);
       }
     }
   }, [user, userData]);
@@ -305,12 +313,25 @@ export default function Timetable() {
         currentDate.startOf("week").toFormat("dd-MM-yyyy"),
         true
       );
-      if (fetchedTimetable != "404") {
+      if (fetchedTimetable != "404" && fetchedTimetable != "429") {
+        setTimetableFound(true);
+        setStopIt429(false);
         setLoadingTimetable(false);
         setTimetable(fetchedTimetable);
         setSearchTerm("");
-      } else {
+      }
+      if (fetchedTimetable == "404") {
+        setTimetable([]);
+        setStopIt429(false);
+        setTimetableFound(false);
         setLoadingTimetable(false);
+      }
+      if (fetchedTimetable == "429") {
+        setTimetable([]);
+        setStopIt429(true);
+        setTimetableFound(false);
+        setLoadingTimetable(false);
+        setSearchTerm("");
       }
     }
   };
@@ -879,12 +900,36 @@ export default function Timetable() {
                       Loading Timetable
                     </span>
                   </div>
-                ) : (
+                ) : isNewUser ? (
                   <span className="font-extrabold text-4xl dark:text-white text-black">
-                    {isNewUser
-                      ? "If you are a new USER search yourself in the SEARCH BAR"
-                      : "..."}
+                    If you are a new USER search yourself in the SEARCH BAR
                   </span>
+                ) : timetableFound ? (
+                  <span className="font-extrabold text-4xl dark:text-white text-black">
+                    ...
+                  </span>
+                ) : stopIt429 ? (
+                  <div className="flex items-center flex-col">
+                    <img
+                      src="/429-stop.gif"
+                      className="rounded-3xl"
+                      alt="Don't be stupid ... (429)"
+                    ></img>
+                    <span className="mt-3 font-extrabold text-3xl dark:text-white text-black">
+                    Don't be stupid... (429)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center flex-col">
+                    <img
+                      src="/404-fine.gif"
+                      className="rounded-3xl"
+                      alt="404 ERROR"
+                    ></img>
+                    <span className="mt-3 font-extrabold text-3xl dark:text-white text-black">
+                    Hmm... no timetable (404)
+                    </span>
+                  </div>
                 )}
               </div>
             )}
