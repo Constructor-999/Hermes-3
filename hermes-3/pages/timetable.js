@@ -288,7 +288,7 @@ export default function Timetable() {
     }
     setCurrentDate(newDate);
     updateTimetable();
-  }
+  };
   const handleColorPickerPopupCancel = () => {
     setPopupClosed(true);
     handleSetClassColor(
@@ -573,14 +573,28 @@ export default function Timetable() {
             className={`h-[75px] dark:bg-gray-800 bg-gray-200 w-full flex items-center z-10`}
           >
             <div className="flex w-full items-center justify-between">
-              <div className="ml-3 w-[23%] min-w-40">
+              <div className="flex items-center ml-3">
                 <input
                   type="text"
                   placeholder="Search classes..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full px-3 py-2 bg-gray-300 dark:bg-gray-600 border border-gray-500 dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-[260px] px-3 py-2 bg-gray-300 dark:bg-gray-600 border border-gray-500 dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 />
+                <button
+                  onClick={() => setIsNewUser(true)}
+                  className="ml-3 dark:bg-gray-600 bg-gray-300 dark:text-white text-gray-600 w-[40px] h-[40px] flex items-center justify-center rounded-md"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 32 32"
+                    className="w-8 h-8 fill-gray-100"
+                  >
+                    <path d="M 16 4 C 10.886719 4 6.617188 7.160156 4.875 11.625 L 6.71875 12.375 C 8.175781 8.640625 11.710938 6 16 6 C 19.242188 6 22.132813 7.589844 23.9375 10 L 20 10 L 20 12 L 27 12 L 27 5 L 25 5 L 25 8.09375 C 22.808594 5.582031 19.570313 4 16 4 Z M 25.28125 19.625 C 23.824219 23.359375 20.289063 26 16 26 C 12.722656 26 9.84375 24.386719 8.03125 22 L 12 22 L 12 20 L 5 20 L 5 27 L 7 27 L 7 23.90625 C 9.1875 26.386719 12.394531 28 16 28 C 21.113281 28 25.382813 24.839844 27.125 20.375 Z"></path>
+                  </svg>
+                </button>
               </div>
               <div className="flex items-center mr-3 select-none">
                 <div className="flex items-center space-x-2 p-2 rounded-lg mr-3">
