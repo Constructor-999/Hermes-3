@@ -5,7 +5,7 @@ import { JsonDB, Config } from "node-json-db";
 import { parseHTML } from "../../components/serverUtils";
 
 const ipRequestTimestamps = {};
-const RATE_LIMIT_INTERVAL = 5000;
+const RATE_LIMIT_INTERVAL = 2000;
 
 const jsonDB = new JsonDB(
   new Config("./bdd/user-config.json", true, true, "/")

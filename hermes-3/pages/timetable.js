@@ -13,6 +13,9 @@ import {
 import { getTodaySubjects } from "../components/utils";
 import { HexColorPicker } from "react-colorful";
 import { getUserData, setClassColor } from "../modules/userConfig";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 export default function Timetable() {
   const [timetable, setTimetable] = useState([]);
@@ -43,6 +46,7 @@ export default function Timetable() {
   const [classColorDropdownHeight, setClassColorDropdownHeight] = useState(0);
   const classColorDropdownRef = useRef(null);
   const [todayClasses, setTodayClasses] = useState([]);
+  const [calendarPickerHidden, setCalendarPickerHidden] = useState(true);
 
   const [isSearchRecommandationOpen, setIsSearchRecommandationOpen] =
     useState(false);
@@ -55,6 +59,8 @@ export default function Timetable() {
   const [userData, setUserData] = useState({});
   const [timetableFound, setTimetableFound] = useState(true);
   const [stopIt429, setStopIt429] = useState(false);
+  const getTimetableTimeout = useRef(null);
+  const [currentTimetable, setCurrentTimetable] = useState("");
 
   const asyncHermesAPIcheck = async () => {
     if (hermesExpiration === 0) {
@@ -64,8 +70,8 @@ export default function Timetable() {
       );
       if (is_expired) {
         try {
-          await signOut(auth); // Sign the user out
-          router.push("/"); // Redirect to login page after logout
+          await signOut(auth);
+          router.push("/");
         } catch (error) {
           console.error("Error signing out: ", error);
         }
@@ -75,8 +81,8 @@ export default function Timetable() {
     } else {
       if (hermesExpiration < Date.now()) {
         try {
-          await signOut(auth); // Sign the user out
-          router.push("/"); // Redirect to login page after logout
+          await signOut(auth);
+          router.push("/");
         } catch (error) {
           console.error("Error signing out: ", error);
         }
@@ -166,6 +172,7 @@ export default function Timetable() {
     });
 
     if (user) {
+      clearTimeout(getTimetableTimeout.current);
       if (localStorage.getItem("HermesDB") == null) {
         getHermesBDD(user);
       }
@@ -253,6 +260,7 @@ export default function Timetable() {
   };
 
   const handleWeekNavigation = (direction) => {
+    updateTimetable();
     const newDate =
       direction === "prev"
         ? currentDate.minus({ weeks: 1 })
@@ -265,6 +273,22 @@ export default function Timetable() {
     setPopupColorPicker({ closed: false, subject, initialColor });
   };
 
+  const updateTimetable = () => {
+    clearTimeout(getTimetableTimeout.current);
+    getTimetableTimeout.current = setTimeout(() => {
+      if (currentTimetable != "") {
+        handleFetchTimetable(currentTimetable);
+      }
+    }, 1200);
+  };
+
+  const handleChangeDateFromCalendar = (newDate) => {
+    if (calendarPickerHidden == false) {
+      setCalendarPickerHidden(true);
+    }
+    setCurrentDate(newDate);
+    updateTimetable();
+  }
   const handleColorPickerPopupCancel = () => {
     setPopupClosed(true);
     handleSetClassColor(
@@ -306,12 +330,15 @@ export default function Timetable() {
 
   const handleFetchTimetable = async (id) => {
     if (user) {
+      if (currentTimetable != id) {
+        setCurrentTimetable(id);
+      }
       setLoadingTimetable(true);
       const fetchedTimetable = await getTimetable(
         user,
         id,
         currentDate.startOf("week").toFormat("dd-MM-yyyy"),
-        true
+        isNewUser
       );
       if (fetchedTimetable != "404" && fetchedTimetable != "429") {
         setTimetableFound(true);
@@ -332,6 +359,12 @@ export default function Timetable() {
         setTimetableFound(false);
         setLoadingTimetable(false);
         setSearchTerm("");
+      }
+      if (fetchedTimetable == "500") {
+        setTimetable([]);
+        setStopIt429(false);
+        setTimetableFound(false);
+        setLoadingTimetable(false);
       }
     }
   };
@@ -517,6 +550,26 @@ export default function Timetable() {
             </ul>
           </div>
           <div
+            className="absolute top-0 right-0 mt-[66px] mr-[276px] rounded-lg border-2 text-white border-indigo-600 dark:bg-gray-800 z-30"
+            hidden={calendarPickerHidden}
+          >
+            <LocalizationProvider dateAdapter={AdapterLuxon}>
+              <DateCalendar
+                value={currentDate}
+                onChange={(newDate) => handleChangeDateFromCalendar(newDate)}
+                slotProps={{
+                  day: {
+                    sx: {
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: "0.85em",
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </div>
+          <div
             className={`h-[75px] dark:bg-gray-800 bg-gray-200 w-full flex items-center z-10`}
           >
             <div className="flex w-full items-center justify-between">
@@ -550,9 +603,14 @@ export default function Timetable() {
                       />
                     </svg>
                   </button>
-                  <span className="dark:bg-gray-600 bg-gray-300 dark:text-white text-gray-600 text-lg text-center font-bold px-6 py-2 rounded-lg min-w-[216px]">
+                  <button
+                    className="dark:bg-gray-600 bg-gray-300 dark:text-white text-gray-600 text-lg text-center font-bold px-6 py-2 rounded-lg min-w-[216px]"
+                    onClick={() => {
+                      setCalendarPickerHidden(!calendarPickerHidden);
+                    }}
+                  >
                     {currentDate.startOf("week").toFormat("DDD")}{" "}
-                  </span>
+                  </button>
                   <button
                     onClick={() => handleWeekNavigation("next")}
                     className="dark:bg-gray-600 bg-gray-300 dark:text-white text-gray-600 h-[44px] w-[44px] flex items-center justify-center rounded-md"
@@ -754,12 +812,12 @@ export default function Timetable() {
                                 <div className="h-full w-[calc(100%-20px)] flex justify-between items-start mt-[6px]">
                                   <span
                                     style={{ fontSize: "18.5px" }}
-                                  >{`${period.lectures[0].subject}`}</span>
-                                  <span>{`${period.lectures[0].className}`}</span>
+                                  >{`${period?.lectures[0].subject}`}</span>
+                                  <span>{`${period?.lectures[0].className}`}</span>
                                 </div>
                                 <div className="w-[calc(100%-20px)] h-full flex justify-between items-end mb-[6px]">
-                                  <span>{`${period.lectures[0].teacher.name}`}</span>
-                                  <span>{`${period.lectures[0].room.join(
+                                  <span>{`${period?.lectures[0].teacher.name}`}</span>
+                                  <span>{`${period?.lectures[0].room.join(
                                     ", "
                                   )}`}</span>
                                 </div>
@@ -851,7 +909,7 @@ export default function Timetable() {
                                           classSubject.subject ==
                                           period.lectures[0].subject
                                       )
-                                    ].color,
+                                    ]?.color,
                                   gridRow: `span ${rowspan}`,
                                 }}
                               >
@@ -916,7 +974,7 @@ export default function Timetable() {
                       alt="Don't be stupid ... (429)"
                     ></img>
                     <span className="mt-3 font-extrabold text-3xl dark:text-white text-black">
-                    Don't be stupid... (429)
+                      Don't be stupid... (429)
                     </span>
                   </div>
                 ) : (
@@ -927,7 +985,7 @@ export default function Timetable() {
                       alt="404 ERROR"
                     ></img>
                     <span className="mt-3 font-extrabold text-3xl dark:text-white text-black">
-                    Hmm... no timetable (404)
+                      Hmm... no timetable (404)
                     </span>
                   </div>
                 )}
